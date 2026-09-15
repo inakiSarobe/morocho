@@ -9,7 +9,7 @@ No hay backend — todo corre en el navegador. Ideal para que los visitantes del
 
 ## Cómo usarlo
 
-1. Abrí la página: [https://inakiSarobe.github.io/morochogithub/](https://inakiSarobe.github.io/morochogithub/)
+1. Abrí la página: [https://inakiSarobe.github.io/morocho/](https://inakiSarobe.github.io/morocho/)
 2. Logueate con:
    - **Email:** `cliente@empresa.com`
    - **Contraseña:** `supersegura`
