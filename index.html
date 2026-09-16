@@ -451,15 +451,13 @@ textarea.roe{resize:vertical;min-height:52px}
         <div class="stab active" onclick="showSideTab('f',this)">Hallazgos</div>
         <div class="stab" onclick="showSideTab('g',this)">Grafo</div>
         <div class="stab" onclick="showSideTab('c',this)">Compliance</div>
-        <div class="stab" onclick="showSideTab('t',this)">Arsenal</div>
       </div>
       <div id="pane-f">
         <div class="fcount" id="fcount"></div>
         <div id="findings-list"><div class="muted">Sin hallazgos aún.</div></div>
       </div>
-      <div id="pane-g" hidden><div class="muted">Sin grafo de ataque aún.</div></div>
-      <div id="pane-c" hidden><div class="muted">Mapeo a OWASP / CWE / PCI / ISO / Ley 25.326.</div></div>
-      <div id="pane-t" hidden><div class="muted">Sin herramientas fabricadas aún.</div></div>
+      <div id="pane-g" hidden><div class="muted" id="grafo-placeholder">Sin grafo de ataque aún.</div><div id="grafo-content" hidden></div></div>
+      <div id="pane-c" hidden><div class="muted" id="compliance-placeholder">Mapeo a OWASP / CWE / PCI / ISO / Ley 25.326.</div><div id="compliance-content" hidden></div></div>
     </div>
   </div>
 </div>
@@ -494,7 +492,7 @@ function mshow(colId,btn){
   if(btn)btn.classList.add('active');
 }
 function showSideTab(tab,el){
-  ['f','g','c','t'].forEach(t=>{const p=$('pane-'+t);if(p)p.hidden=(t!==tab)});
+  ['f','g','c'].forEach(t=>{const p=$('pane-'+t);if(p)p.hidden=(t!==tab)});
   el.parentElement.querySelectorAll('.stab').forEach(s=>s.classList.remove('active'));
   el.classList.add('active');
 }
@@ -545,13 +543,14 @@ function openPlan(){
     {id:1,name:'Dev',price:89,unit:'/mes',seg:'Desarrolladores',cur:false,rec:false,lim:['15','Ilimitado','3','—','✓','OWASP / CWE','✓','—','1','3','—','Mail']},
     {id:2,name:'Pyme',price:599,unit:'/mes',seg:'Empresas',cur:true,rec:true,lim:['150','Ilimitado','10','20','✓','PCI · ISO · Ley','✓','Add-on','2','10','—','Prioritario']},
     {id:3,name:'Agencia',price:399,unit:'/cliente',seg:'Consultoras',cur:false,rec:false,lim:['150','Ilimitado','∞','∞','✓','PCI · ISO · Ley','✓','—','5','∞','✓','Dedicado']},
-    {id:4,name:'Full',price:5000,unit:'/mes',seg:'Enterprise',cur:false,rec:false,lim:['∞','Ilimitado','∞','∞','✓','PCI · ISO · Ley','✓','Incluida','∞','∞','✓','Dedicado + SLA']}
+    {id:4,name:'Full',price:null,unit:'',seg:'Enterprise',cur:false,rec:false,lim:['∞','Ilimitado','∞','∞','✓','PCI · ISO · Ley','✓','Incluida','∞','∞','✓','Dedicado + SLA']}
   ];
   const ROWS=['Ataques dinámicos / mes','Análisis de código (SAST)','Objetivos / RoEs','Subdominios',
     'Integración CI/CD','Compliance + attestation','Re-test de verificación','Revisión humana',
     'Ejecuciones simultáneas','Cuentas','White-label / multi-cliente','Soporte'];
   let head='<tr><th class="f"></th>'+PLANS.map(p=>'<th class="'+(p.rec?'rec':'')+(p.cur?' cur':'')+'">'
-    +'<div class="pn">'+esc(p.name)+'</div><div class="pp">$'+p.price+'<small> '+esc(p.unit)+'</small></div>'
+    +'<div class="pn">'+esc(p.name)+'</div>'
+    +(p.price!=null?'<div class="pp">$'+p.price+'<small> '+esc(p.unit)+'</small></div>':'<div class="pp" style="font-size:12px">Contactanos</div>')
     +'<div class="ps">'+esc(p.seg)+'</div>'
     +(p.cur?'<div class="pcur">tu plan</div>':'<button class="btn sm" onclick="toast(\'Solicitud registrada ✓\')">Solicitar</button>')
     +'</th>').join('')+'</tr>';
@@ -822,6 +821,8 @@ const PLAYBACK={
 
 // ==== APP STATE ====
 let currentCase=null,playing=false,playAbort=false,costSim=0,timerStart=0,timerInterval=null,foundFindings=[];
+// Smart auto-scroll: only scroll down if user is near the bottom
+function autoScroll(){const c=$('console');if(c.scrollHeight-c.scrollTop-c.clientHeight<80)c.scrollTop=c.scrollHeight}
 
 // ---- Dashboard ----
 function renderDashboard(){
@@ -849,10 +850,12 @@ function openEngagement(key){
   $('roe-creds').innerHTML=eng.creds.length?eng.creds.map(c=>`<div style="background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:6px 8px;margin-bottom:4px;font-size:11px"><b>${esc(c.label)}</b><br><span class="udim">${esc(c.user)} / ${esc(c.pass)}</span>${c.note?' · <span class="udim">'+esc(c.note)+'</span>':''}</div>`).join(''):'<div class="hint">Sin credenciales provistas.</div>';
   $('roe-cats').innerHTML=ROE_CATEGORIES.map(c=>`<label class="cat"><input type="checkbox" ${eng.forbid.includes(c.id)?'checked':''} disabled> <span>${esc(c.label)}</span></label>`).join('');
   $('roe-extra').value=eng.extra;
-  // Reset console
+  // Reset console + side panes
   $('console').innerHTML='<span class="muted">La consola mostrar\xe1 en vivo cada acci\xf3n de la IA…</span>';
   $('findings-list').innerHTML='<div class="muted">Sin hallazgos a\xfan.</div>';
   $('fcount').innerHTML='';
+  $('grafo-placeholder').hidden=false;$('grafo-content').hidden=true;$('grafo-content').innerHTML='';
+  $('compliance-placeholder').hidden=false;$('compliance-content').hidden=true;$('compliance-content').innerHTML='';
   document.querySelectorAll('.ph').forEach(p=>{p.classList.remove('active','done')});
   updateChips('idle');
   $('msg-input').value='';$('msg-input').disabled=false;$('msg-go').disabled=false;$('msg-stop').disabled=true;
@@ -863,10 +866,10 @@ function openEngagement(key){
 
 function updateChips(state){
   const c=$('attack-chips');
-  if(state==='idle') c.innerHTML='<span class="chip">Estado <b class="on">● listo</b></span><span class="chip">Modelo <b>claude-opus-4-6</b></span>';
-  else if(state==='running') c.innerHTML='<span class="chip">Estado <b class="on">● atacando</b></span><span class="chip">Modelo <b>claude-opus-4-6</b></span><span class="chip">Costo <b id="chip-cost">$0.00</b></span><span class="chip">⏱ <b id="chip-time">0m 0s</b></span>';
+  if(state==='idle') c.innerHTML='';
+  else if(state==='running') c.innerHTML='<span class="chip">Costo <b id="chip-cost">$0.00</b></span><span class="chip">⏱ <b id="chip-time">0m 0s</b></span>';
   else if(state==='done'){const el=Math.floor((Date.now()-timerStart)/1000),m=Math.floor(el/60),s=el%60;
-    c.innerHTML=`<span class="chip">Estado <b style="color:var(--grn)">✓ finalizado</b></span><span class="chip">Modelo <b>claude-opus-4-6</b></span><span class="chip">Costo <b>$${costSim.toFixed(2)}</b></span><span class="chip">⏱ <b>${m}m ${s}s</b></span><span class="chip">Hallazgos <b>${foundFindings.length}</b></span>`}
+    c.innerHTML=`<span class="chip">Costo <b>$${costSim.toFixed(2)}</b></span><span class="chip">⏱ <b>${m}m ${s}s</b></span><span class="chip">Hallazgos <b>${foundFindings.length}</b></span>`}
 }
 function startTimer(){timerStart=Date.now();timerInterval=setInterval(()=>{const el=$('chip-time');if(!el)return;const s=Math.floor((Date.now()-timerStart)/1000);el.textContent=Math.floor(s/60)+'m '+s%60+'s'},1000)}
 function stopTimer(){clearInterval(timerInterval)}
@@ -876,7 +879,7 @@ function sendMsg(){
   const input=$('msg-input'),msg=input.value.trim();if(!msg||playing)return;
   input.value='';input.disabled=true;$('msg-go').disabled=true;$('msg-stop').disabled=false;
   const con=$('console');const div=document.createElement('div');div.className='msgu';
-  div.innerHTML=`<div class="b">${esc(msg)}</div>`;con.appendChild(div);con.scrollTop=con.scrollHeight;
+  div.innerHTML=`<div class="b">${esc(msg)}</div>`;con.appendChild(div);autoScroll();
   startAttack(currentCase);
 }
 
@@ -895,11 +898,12 @@ async function startAttack(caseId){
       case 'finding':addFinding(findings[ev.f]);appendFindingNotice(findings[ev.f]);addCost(0.03);break;
       case 'done':break;
     }
-    $('console').scrollTop=$('console').scrollHeight;
+    autoScroll();
   }
   if(!playAbort){playing=false;stopTimer();updateChips('done');$('msg-stop').disabled=true;
     appendSys('\n✓ Ataque finalizado — '+foundFindings.length+' hallazgos encontrados.\n  Reporte disponible para descargar.');
-    $('console').scrollTop=$('console').scrollHeight;
+    autoScroll();
+    fillGrafo(caseId);fillCompliance(caseId);
     $('msg-input').placeholder='Ataque completado. Volv\xe9 al dashboard para probar otro.';
     if(window.innerWidth<=860)setTimeout(()=>mshow('col-side',document.querySelector('.mnav button[data-m="col-side"]')),1500);
   }
@@ -911,8 +915,7 @@ function appendText(t){const el=document.createElement('div');el.className='e-tx
 function appendPhase(p){const names={recon:'RECONOCIMIENTO',scan:'ESCANEO',exploit:'EXPLOTACI\xd3N',post:'POST-EXPLOTACI\xd3N',report:'GENERACI\xd3N DE REPORTE'};
   const el=document.createElement('div');el.className='e-phase';el.style.margin='8px 0 4px';el.textContent='━━ FASE: '+(names[p]||p.toUpperCase())+' ━━';$('console').appendChild(el)}
 function appendTool(name,cmd,output){
-  if(consoleMode==='conservative'){appendText('['+name+'] ejecutado.');return}
-  const b=document.createElement('div');b.className='toolblock';
+  const b=document.createElement('div');b.className='toolblock'+(consoleMode==='conservative'?' collapsed':'');
   b.innerHTML='<div class="th" onclick="this.parentElement.classList.toggle(\'collapsed\')"><span class="arrow">▶</span><span><span class="tname">['+esc(name)+']</span> <span class="tcmd">'+esc(cmd.split('\n')[0])+'</span></span></div><div class="tb">'+esc(output)+'</div>';
   $('console').appendChild(b);
 }
@@ -937,6 +940,108 @@ function updateFindingCount(){const counts={critical:0,high:0,medium:0,low:0};fo
   const colors={critical:'#ff2d55',high:'var(--red)',medium:'var(--amb)',low:'var(--cy)'};
   let h='';for(const[s,n]of Object.entries(counts))if(n>0)h+='<span class="fc"><b style="color:'+colors[s]+'">'+n+'</b> '+s+'</span>';
   h+='<span class="fc"><b>'+foundFindings.length+'</b> total</span>';$('fcount').innerHTML=h}
+
+// ==== GRAFO & COMPLIANCE DATA ====
+const GRAFO_DATA={
+  elcinelunar:`<svg viewBox="0 0 280 320" style="width:100%;max-width:280px;display:block;margin:0 auto" xmlns="http://www.w3.org/2000/svg">
+<style>text{font:10px var(--mono);fill:var(--txt)}rect{rx:4}line{stroke:var(--line);stroke-width:1}</style>
+<rect x="90" y="4" width="100" height="24" fill="#132234" stroke="#35c9e6"/><text x="140" y="20" text-anchor="middle" fill="#35c9e6">elcinelunar.com</text>
+<line x1="140" y1="28" x2="70" y2="60"/><line x1="140" y1="28" x2="210" y2="60"/>
+<rect x="20" y="56" width="100" height="22" fill="#132234" stroke="#ffb454"/><text x="70" y="71" text-anchor="middle" fill="#ffb454">:80 IIS/10.0</text>
+<rect x="160" y="56" width="100" height="22" fill="#132234" stroke="#ffb454"/><text x="210" y="71" text-anchor="middle" fill="#ffb454">:443 SSL</text>
+<line x1="70" y1="78" x2="70" y2="106"/><line x1="210" y1="78" x2="140" y2="106"/>
+<rect x="20" y="102" width="100" height="22" fill="#132234" stroke="#ff5c5c"/><text x="70" y="117" text-anchor="middle" fill="#ff5c5c">/admin/ panel</text>
+<rect x="160" y="102" width="100" height="22" fill="#132234" stroke="#3ddc84"/><text x="210" y="117" text-anchor="middle">/cartelera</text>
+<line x1="70" y1="124" x2="70" y2="152"/>
+<rect x="10" y="148" width="120" height="22" fill="#2a0000" stroke="#ff2d55"/><text x="70" y="163" text-anchor="middle" fill="#ff2d55">CRED HARDCODED</text>
+<line x1="210" y1="124" x2="210" y2="152"/>
+<rect x="160" y="148" width="100" height="22" fill="#2a1500" stroke="#ff5c5c"/><text x="210" y="163" text-anchor="middle" fill="#ff5c5c">XSS reflejado</text>
+<line x1="140" y1="78" x2="140" y2="198"/>
+<rect x="70" y="194" width="140" height="22" fill="#2a1500" stroke="#ff5c5c"/><text x="140" y="209" text-anchor="middle" fill="#ff5c5c">IDOR /ImprimirTicket</text>
+<line x1="140" y1="216" x2="140" y2="244"/>
+<rect x="60" y="240" width="160" height="22" fill="#132234" stroke="#ffb454"/><text x="140" y="255" text-anchor="middle" fill="#ffb454">Sin X-Frame + Sin CSRF</text>
+<line x1="140" y1="262" x2="140" y2="288"/>
+<rect x="50" y="284" width="180" height="22" fill="#132234" stroke="#35c9e6"/><text x="140" y="299" text-anchor="middle" fill="#35c9e6">Server: IIS/10.0 expuesto</text>
+</svg>`,
+  regalosdigital:`<svg viewBox="0 0 280 320" style="width:100%;max-width:280px;display:block;margin:0 auto" xmlns="http://www.w3.org/2000/svg">
+<style>text{font:10px var(--mono);fill:var(--txt)}rect{rx:4}line{stroke:var(--line);stroke-width:1}</style>
+<rect x="65" y="4" width="150" height="24" fill="#132234" stroke="#35c9e6"/><text x="140" y="20" text-anchor="middle" fill="#35c9e6">regalosdigital.com</text>
+<line x1="140" y1="28" x2="70" y2="60"/><line x1="140" y1="28" x2="210" y2="60"/>
+<rect x="10" y="56" width="120" height="22" fill="#132234" stroke="#ffb454"/><text x="70" y="71" text-anchor="middle" fill="#ffb454">WordPress 6.x</text>
+<rect x="150" y="56" width="120" height="22" fill="#132234" stroke="#ffb454"/><text x="210" y="71" text-anchor="middle" fill="#ffb454">WooCommerce</text>
+<line x1="70" y1="78" x2="70" y2="106"/>
+<rect x="10" y="102" width="120" height="22" fill="#2a1500" stroke="#ff5c5c"/><text x="70" y="117" text-anchor="middle" fill="#ff5c5c">/wp-json/wp/v2/users</text>
+<line x1="210" y1="78" x2="210" y2="106"/>
+<rect x="140" y="102" width="140" height="22" fill="#2a0000" stroke="#ff2d55"/><text x="210" y="117" text-anchor="middle" fill="#ff2d55">gift-cards API</text>
+<line x1="210" y1="124" x2="140" y2="156"/><line x1="210" y1="124" x2="210" y2="156"/>
+<rect x="70" y="152" width="140" height="22" fill="#2a0000" stroke="#ff2d55"/><text x="140" y="167" text-anchor="middle" fill="#ff2d55">GC sin pago $$</text>
+<rect x="150" y="182" width="120" height="22" fill="#2a1500" stroke="#ff5c5c"/><text x="210" y="197" text-anchor="middle" fill="#ff5c5c">Precio $0.00</text>
+<line x1="140" y1="174" x2="140" y2="216"/>
+<rect x="60" y="212" width="160" height="22" fill="#132234" stroke="#ffb454"/><text x="140" y="227" text-anchor="middle" fill="#ffb454">XSS en mensaje GC</text>
+<line x1="140" y1="234" x2="140" y2="260"/>
+<rect x="50" y="256" width="180" height="22" fill="#132234" stroke="#ffb454"/><text x="140" y="271" text-anchor="middle" fill="#ffb454">/wc/v3/products sin auth</text>
+<line x1="140" y1="278" x2="140" y2="298"/>
+<rect x="50" y="294" width="180" height="22" fill="#132234" stroke="#35c9e6"/><text x="140" y="309" text-anchor="middle" fill="#35c9e6">GC-IDs secuenciales</text>
+</svg>`,
+  licitaonline:`<svg viewBox="0 0 280 290" style="width:100%;max-width:280px;display:block;margin:0 auto" xmlns="http://www.w3.org/2000/svg">
+<style>text{font:10px var(--mono);fill:var(--txt)}rect{rx:4}line{stroke:var(--line);stroke-width:1}</style>
+<rect x="75" y="4" width="130" height="24" fill="#132234" stroke="#35c9e6"/><text x="140" y="20" text-anchor="middle" fill="#35c9e6">185.62.33.47</text>
+<line x1="140" y1="28" x2="70" y2="60"/><line x1="140" y1="28" x2="210" y2="60"/>
+<rect x="10" y="56" width="120" height="22" fill="#2a1500" stroke="#ff5c5c"/><text x="70" y="71" text-anchor="middle" fill="#ff5c5c">nginx/1.20.1 CVE</text>
+<rect x="150" y="56" width="120" height="22" fill="#132234" stroke="#ffb454"/><text x="210" y="71" text-anchor="middle" fill="#ffb454">:8080 Node.js</text>
+<line x1="210" y1="78" x2="140" y2="110"/><line x1="210" y1="78" x2="210" y2="110"/>
+<rect x="60" y="106" width="160" height="22" fill="#132234" stroke="#ffb454"/><text x="140" y="121" text-anchor="middle" fill="#ffb454">/api/v1/auctions PII</text>
+<rect x="145" y="136" width="130" height="22" fill="#132234" stroke="#ffb454"/><text x="210" y="151" text-anchor="middle" fill="#ffb454">CORS * financiero</text>
+<line x1="140" y1="128" x2="140" y2="172"/>
+<rect x="40" y="168" width="200" height="22" fill="#132234" stroke="#35c9e6"/><text x="140" y="183" text-anchor="middle" fill="#35c9e6">Headers faltantes</text>
+<line x1="140" y1="190" x2="140" y2="210"/>
+<rect x="40" y="206" width="200" height="22" fill="#132234" stroke="#35c9e6"/><text x="140" y="221" text-anchor="middle" fill="#35c9e6">Cookie sin SameSite</text>
+<line x1="140" y1="228" x2="140" y2="248"/>
+<rect x="30" y="244" width="220" height="22" fill="#132234" stroke="#35c9e6"/><text x="140" y="259" text-anchor="middle" fill="#35c9e6">Debug: schema expuesto</text>
+</svg>`
+};
+
+const COMPLIANCE_DATA={
+  elcinelunar:[
+    {finding:'Contraseña en código fuente',owasp:'A07:2021 Identification and Authentication Failures',cwe:'CWE-798',pci:'Req 6.5.3 · 8.2.1',iso:'A.9.4.3'},
+    {finding:'Reflected XSS',owasp:'A03:2021 Injection (XSS)',cwe:'CWE-79',pci:'Req 6.5.7',iso:'A.14.2.5'},
+    {finding:'IDOR en tickets',owasp:'A01:2021 Broken Access Control',cwe:'CWE-639',pci:'Req 6.5.8',iso:'A.9.4.1'},
+    {finding:'Clickjacking',owasp:'A05:2021 Security Misconfiguration',cwe:'CWE-1021',pci:'Req 6.5.10',iso:'A.14.1.2'},
+    {finding:'CSRF en perfil',owasp:'A01:2021 Broken Access Control',cwe:'CWE-352',pci:'Req 6.5.9',iso:'A.14.2.5'},
+    {finding:'Server info disclosure',owasp:'A05:2021 Security Misconfiguration',cwe:'CWE-200',pci:'Req 6.5.6',iso:'A.12.6.1'}
+  ],
+  regalosdigital:[
+    {finding:'Gift card sin pago',owasp:'A04:2021 Insecure Design',cwe:'CWE-840',pci:'Req 6.5.8',iso:'A.14.2.5'},
+    {finding:'Manipulación de precio',owasp:'A04:2021 Insecure Design',cwe:'CWE-472',pci:'Req 6.5.5',iso:'A.14.2.5'},
+    {finding:'Stored XSS',owasp:'A03:2021 Injection (XSS)',cwe:'CWE-79',pci:'Req 6.5.7',iso:'A.14.2.5'},
+    {finding:'Enumeración de usuarios',owasp:'A01:2021 Broken Access Control',cwe:'CWE-200',pci:'Req 6.5.8',iso:'A.9.4.1'},
+    {finding:'API sin autenticación',owasp:'A07:2021 Identification and Authentication Failures',cwe:'CWE-306',pci:'Req 6.5.10',iso:'A.9.4.1'},
+    {finding:'GC IDs predecibles',owasp:'A02:2021 Cryptographic Failures',cwe:'CWE-330',pci:'Req 6.5.3',iso:'A.10.1.1'}
+  ],
+  licitaonline:[
+    {finding:'nginx CVEs',owasp:'A06:2021 Vulnerable and Outdated Components',cwe:'CWE-1104',pci:'Req 6.2',iso:'A.12.6.1'},
+    {finding:'Exposición datos vendedor',owasp:'A01:2021 Broken Access Control',cwe:'CWE-200',pci:'Req 6.5.8 · Ley 25.326',iso:'A.18.1.4'},
+    {finding:'CORS wildcard',owasp:'A05:2021 Security Misconfiguration',cwe:'CWE-942',pci:'Req 6.5.9',iso:'A.14.1.2'},
+    {finding:'Headers faltantes',owasp:'A05:2021 Security Misconfiguration',cwe:'CWE-693',pci:'Req 6.5.10',iso:'A.14.1.2'},
+    {finding:'Cookie sin SameSite',owasp:'A05:2021 Security Misconfiguration',cwe:'CWE-1275',pci:'Req 6.5.10',iso:'A.14.1.2'},
+    {finding:'Debug schema expuesto',owasp:'A05:2021 Security Misconfiguration',cwe:'CWE-215',pci:'Req 6.5.6',iso:'A.12.6.1'}
+  ]
+};
+
+function fillGrafo(caseId){
+  const svg=GRAFO_DATA[caseId];if(!svg)return;
+  $('grafo-placeholder').hidden=true;$('grafo-content').hidden=false;
+  $('grafo-content').innerHTML='<h2 class="sec" style="margin-bottom:8px">Grafo de Ataque</h2>'+svg;
+}
+function fillCompliance(caseId){
+  const rows=COMPLIANCE_DATA[caseId];if(!rows)return;
+  $('compliance-placeholder').hidden=true;$('compliance-content').hidden=false;
+  let html='<h2 class="sec" style="margin-bottom:8px">Mapeo de Compliance</h2><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:500px">';
+  html+='<tr style="border-bottom:1px solid var(--line)"><th style="text-align:left;padding:6px;color:var(--cy)">Hallazgo</th><th style="text-align:left;padding:6px;color:var(--cy)">OWASP 2021</th><th style="text-align:left;padding:6px;color:var(--cy)">CWE</th><th style="text-align:left;padding:6px;color:var(--cy)">PCI DSS</th><th style="text-align:left;padding:6px;color:var(--cy)">ISO 27001</th></tr>';
+  rows.forEach(r=>{html+='<tr style="border-bottom:1px solid var(--line)"><td style="padding:6px;color:var(--txt)">'+esc(r.finding)+'</td><td style="padding:6px;color:var(--dim)">'+esc(r.owasp)+'</td><td style="padding:6px;color:var(--amb)">'+esc(r.cwe)+'</td><td style="padding:6px;color:var(--dim)">'+esc(r.pci)+'</td><td style="padding:6px;color:var(--dim)">'+esc(r.iso)+'</td></tr>'});
+  html+='</table></div>';
+  $('compliance-content').innerHTML=html;
+}
 
 function goBack(){stopAttack();currentCase=null;showScreen('s-dashboard')}
 
